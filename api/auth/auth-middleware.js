@@ -61,9 +61,9 @@ const only = role_name => (req, res, next) => {
 
 const checkUsernameExists = async (req, res, next) => {
   const { username } = req.body;
-  const dbUsername = await User.findBy(username);
-  if (username !== dbUsername) {
-    next({
+  const [user] = await User.findBy({ username });
+  if (!user) {
+    return next({
       status: 401,
       message: 'Invalid credentials'
     });
@@ -82,11 +82,13 @@ const checkUsernameExists = async (req, res, next) => {
 
 const validateRoleName = (req, res, next) => {
   const { role_name } = req.body;
-  if (role_name || role_name.trim()) {
+  if (role_name) {
     req.role_name = role_name.trim();
-    next();    
-  } else {
+    next();       
+  } else if (!role_name || role_name === " ") {
     req.role_name = 'student';
+    next();       
+  }else{
     next();       
   }
 
